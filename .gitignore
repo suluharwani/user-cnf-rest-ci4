@@ -2,3 +2,4 @@
 /writable/debugbar
 /writable/logs
 *.log
+/writable/logs
