@@ -29,6 +29,7 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
         ),
         'F' =>
         array (
+            'Firebase\\JWT\\' => 13,
             'Faker\\' => 6,
         ),
         'D' =>
@@ -67,6 +68,10 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
         array (
             0 => __DIR__ . '/..' . '/laminas/laminas-escaper/src',
         ),
+        'Firebase\\JWT\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
+        ),
         'Faker\\' =>
         array (
             0 => __DIR__ . '/..' . '/fakerphp/faker/src/Faker',
@@ -100,8 +105,19 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
     );
 
     public static $classMap = array (
+        'App\\Controllers\\Api\\ApplicationController' => __DIR__ . '/../..' . '/app/Controllers/Api/ApplicationController.php',
+        'App\\Controllers\\Api\\AuthController' => __DIR__ . '/../..' . '/app/Controllers/Api/AuthController.php',
+        'App\\Controllers\\Api\\RoleController' => __DIR__ . '/../..' . '/app/Controllers/Api/RoleController.php',
+        'App\\Controllers\\Api\\RolePermissionController' => __DIR__ . '/../..' . '/app/Controllers/Api/RolePermissionController.php',
+        'App\\Controllers\\Api\\UserManagementController' => __DIR__ . '/../..' . '/app/Controllers/Api/UserManagementController.php',
         'App\\Controllers\\BaseController' => __DIR__ . '/../..' . '/app/Controllers/BaseController.php',
         'App\\Controllers\\Home' => __DIR__ . '/../..' . '/app/Controllers/Home.php',
+        'App\\Filters\\Auth' => __DIR__ . '/../..' . '/app/Filters/Auth.php',
+        'App\\Models\\ApplicationModel' => __DIR__ . '/../..' . '/app/Models/ApplicationModel.php',
+        'App\\Models\\ModuleModel' => __DIR__ . '/../..' . '/app/Models/ModuleModel.php',
+        'App\\Models\\RoleModel' => __DIR__ . '/../..' . '/app/Models/RoleModel.php',
+        'App\\Models\\RolePermissionModel' => __DIR__ . '/../..' . '/app/Models/RolePermissionModel.php',
+        'App\\Models\\UserModel' => __DIR__ . '/../..' . '/app/Models/UserModel.php',
         'CodeIgniter\\API\\ApiException' => __DIR__ . '/..' . '/codeigniter4/framework/system/API/ApiException.php',
         'CodeIgniter\\API\\BaseTransformer' => __DIR__ . '/..' . '/codeigniter4/framework/system/API/BaseTransformer.php',
         'CodeIgniter\\API\\ResponseTrait' => __DIR__ . '/..' . '/codeigniter4/framework/system/API/ResponseTrait.php',
@@ -1095,6 +1111,14 @@ class ComposerStaticInitf5cce40800fa5dae1504b9364f585e6a
         'Faker\\Provider\\zh_TW\\Text' => __DIR__ . '/..' . '/fakerphp/faker/src/Faker/Provider/zh_TW/Text.php',
         'Faker\\UniqueGenerator' => __DIR__ . '/..' . '/fakerphp/faker/src/Faker/UniqueGenerator.php',
         'Faker\\ValidGenerator' => __DIR__ . '/..' . '/fakerphp/faker/src/Faker/ValidGenerator.php',
+        'Firebase\\JWT\\BeforeValidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/BeforeValidException.php',
+        'Firebase\\JWT\\CachedKeySet' => __DIR__ . '/..' . '/firebase/php-jwt/src/CachedKeySet.php',
+        'Firebase\\JWT\\ExpiredException' => __DIR__ . '/..' . '/firebase/php-jwt/src/ExpiredException.php',
+        'Firebase\\JWT\\JWK' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWK.php',
+        'Firebase\\JWT\\JWT' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWT.php',
+        'Firebase\\JWT\\JWTExceptionWithPayloadInterface' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWTExceptionWithPayloadInterface.php',
+        'Firebase\\JWT\\Key' => __DIR__ . '/..' . '/firebase/php-jwt/src/Key.php',
+        'Firebase\\JWT\\SignatureInvalidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/SignatureInvalidException.php',
         'Laminas\\Escaper\\Escaper' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/Escaper.php',
         'Laminas\\Escaper\\EscaperInterface' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/EscaperInterface.php',
         'Laminas\\Escaper\\Exception\\ExceptionInterface' => __DIR__ . '/..' . '/laminas/laminas-escaper/src/Exception/ExceptionInterface.php',
