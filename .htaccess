@@ -1,0 +1,6 @@
+RewriteEngine On
+RewriteBase /
+
+# Redirect semua request ke folder public
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ /public/$1 [L]
