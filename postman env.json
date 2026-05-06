@@ -1,0 +1,164 @@
+{
+  "id": "merged-furniture-user-mgmt-env",
+  "name": "Furniture Factory - Inventory + User Management",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "admin_username",
+      "value": "admin",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "admin_password",
+      "value": "admin123!",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "current_user_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "first_user_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "app_inventory_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "app_hr_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "module_products_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "module_stock_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "role_inventory_manager_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "role_inventory_staff_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "cdn_file_id",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "user_avatar_url",
+      "value": "",
+      "type": "any",
+      "enabled": true
+    },
+    {
+      "key": "wood_material_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "fabric_material_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "finishing_material_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "packaging_material_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "intl_supplier_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "local_supplier_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "po_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "gr_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "opname_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "damage_report_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "doc_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "material_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "color": null,
+  "_postman_variable_scope": "environment"
+}

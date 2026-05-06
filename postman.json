@@ -1,14 +1,23 @@
 {
   "info": {
-    "_postman_id": "41bfbc59-2122-4af4-8904-7cca9620bd89",
-    "name": "User Management API - RBAC + CDN + Avatar",
-    "description": "REST API untuk User Management dengan Role-Based Access Control, CDN File Management, dan User Avatar",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "8868561"
+    "_postman_id": "merged-furniture-user-mgmt",
+    "name": "Furniture Factory - Inventory + User Management API",
+    "description": "Gabungan REST API untuk:\n1. Sistem Inventory Pabrik Furniture (Material, PO, GR, Stock Opname, dll)\n2. User Management dengan RBAC, CDN File Management, dan User Avatar\n\nFitur Inventory:\n- Material Management (Kayu, Finishing, Kain, Hardware, Packaging)\n- Multi Currency (USD, CNY, IDR)\n- Supplier International & Lokal\n- Purchase Order & Goods Receipt\n- Stock Opname\n- Damage Report & Material Disposal\n- Document Management (Customs, PIB, SPPB)\n- Upload Documents ke CDN\n- Stock Movement Tracking\n\nFitur User Management:\n- Authentication (Register, Login, Profile)\n- Role-Based Access Control (Applications, Modules, Roles, Permissions)\n- User Avatar Management\n- CDN File Management (Upload, Download, Preview, Folder Management)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
   },
   "item": [
     {
-      "name": "1. Authentication",
+      "name": "0. Authentication & User Setup",
       "item": [
         {
           "name": "Register - First Admin User",
@@ -146,11 +155,67 @@
             "description": "Dapatkan profil user yang sedang login (termasuk avatar)."
           },
           "response": []
+        },
+        {
+          "name": "Upload User Avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.avatar) {",
+                  "    pm.environment.set(\"user_avatar_url\", jsonData.avatar.url);",
+                  "    console.log('Avatar URL:', jsonData.avatar.url);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "description": "Pilih foto avatar (JPEG, PNG, GIF, WebP - max 2 MB)",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{current_user_id}}/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{current_user_id}}",
+                "avatar"
+              ]
+            },
+            "description": "Upload/Update foto profil user. Hanya gambar (JPEG, PNG, GIF, WebP) dengan maksimal 2 MB."
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "2. Applications CRUD",
+      "name": "1. User Management - Applications, Modules & Roles",
       "item": [
         {
           "name": "Get All Applications",
@@ -221,51 +286,6 @@
           "response": []
         },
         {
-          "name": "Create Application - HR",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.id) {",
-                  "    pm.environment.set(\"app_hr_id\", jsonData.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"app_name\": \"Human Resource System\",\n    \"app_code\": \"hr_system\",\n    \"description\": \"Sistem manajemen karyawan dan HR\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/applications",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Get Application by ID",
           "request": {
             "method": "GET",
@@ -289,67 +309,6 @@
           },
           "response": []
         },
-        {
-          "name": "Update Application",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"app_name\": \"Inventory System Updated\",\n    \"description\": \"Updated description\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/applications/{{app_inventory_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications",
-                "{{app_inventory_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Application",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/applications/{{app_inventory_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications",
-                "{{app_inventory_id}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "3. Modules CRUD",
-      "item": [
         {
           "name": "Create Module - Products",
           "event": [
@@ -440,36 +399,6 @@
           },
           "response": []
         },
-        {
-          "name": "Get Modules by Application",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/applications/{{app_inventory_id}}/modules",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "applications",
-                "{{app_inventory_id}}",
-                "modules"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "4. Roles CRUD",
-      "item": [
         {
           "name": "Get All Roles",
           "request": {
@@ -582,12 +511,7 @@
             }
           },
           "response": []
-        }
-      ]
-    },
-    {
-      "name": "5. Role Permissions",
-      "item": [
+        },
         {
           "name": "Set Permissions - Inventory Manager (Full)",
           "request": {
@@ -651,97 +575,6 @@
           "response": []
         },
         {
-          "name": "Get Permissions by Role",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/roles/{{role_inventory_manager_id}}/permissions",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "roles",
-                "{{role_inventory_manager_id}}",
-                "permissions"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "6. User Management",
-      "item": [
-        {
-          "name": "Get All Users",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/users",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "users"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get User by ID (with Avatar)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/users/{{current_user_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "users",
-                "{{current_user_id}}"
-              ]
-            },
-            "description": "Dapatkan detail user by ID termasuk info avatar."
-          },
-          "response": []
-        },
-        {
           "name": "Assign Role to User",
           "request": {
             "method": "POST",
@@ -798,28 +631,1430 @@
             }
           },
           "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Currencies & Exchange Rates",
+      "item": [
+        {
+          "name": "Get All Currencies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/currencies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "currencies"
+              ]
+            }
+          }
         },
         {
-          "name": "Upload User Avatar",
+          "name": "Create Currency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"EUR\",\n    \"name\": \"Euro\",\n    \"symbol\": \"€\",\n    \"is_base\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/currencies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "currencies"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Latest Exchange Rates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/exchange-rates/latest",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "exchange-rates",
+                "latest"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Exchange Rate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"from_currency_id\": 2,\n    \"to_currency_id\": 1,\n    \"rate\": 15800.00,\n    \"effective_date\": \"2026-05-06\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/exchange-rates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "exchange-rates"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Warehouses & Racks",
+      "item": [
+        {
+          "name": "Get All Warehouses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/warehouses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "warehouses"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Warehouse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"warehouse_code\": \"WH-WOOD\",\n    \"warehouse_name\": \"Gudang Kayu\",\n    \"warehouse_type\": \"main\",\n    \"location\": \"Building A\",\n    \"capacity_volume\": 500.0000,\n    \"capacity_weight\": 50000.0000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/warehouses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "warehouses"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Material Categories & UOM",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Category Tree",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/categories/tree",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "categories",
+                "tree"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All UOM",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/uom",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "uom"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Materials Master",
+      "item": [
+        {
+          "name": "Get All Materials",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
                   "var jsonData = pm.response.json();",
-                  "if (jsonData.avatar) {",
-                  "    pm.environment.set(\"user_avatar_url\", jsonData.avatar.url);",
-                  "    console.log('Avatar URL:', jsonData.avatar.url);",
+                  "if (jsonData.data && jsonData.data.length > 0) {",
+                  "    pm.environment.set(\"material_id\", jsonData.data[0].id);",
                   "}"
                 ],
                 "type": "text/javascript"
               }
             }
           ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials?page=1&limit=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Wood Material (Cubic)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"wood_material_id\", jsonData.id);",
+                  "    console.log('Wood Material Code:', jsonData.material_code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"material_name\": \"Kayu Jati Solid Grade A\",\n    \"category_id\": 2,\n    \"material_type\": \"raw_wood\",\n    \"uom_id\": 1,\n    \"density\": 720.0000,\n    \"moisture_content\": 12.00,\n    \"wood_grade\": \"A\",\n    \"wood_species\": \"Teak\",\n    \"min_stock\": 5.0000,\n    \"max_stock\": 50.0000,\n    \"lead_time_days\": 30,\n    \"is_batch_tracked\": 1,\n    \"requires_inspection\": 1,\n    \"storage_condition\": \"Simpan di tempat kering, hindari kelembaban tinggi\",\n    \"handling_instruction\": \"Gunakan forklift untuk pengangkatan\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials"
+              ]
+            },
+            "description": "Kayu disimpan dengan ukuran Cubic Meter (M³)"
+          }
+        },
+        {
+          "name": "Create Fabric Material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"fabric_material_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"material_name\": \"Kain Upholstery Velvet Navy\",\n    \"category_id\": 9,\n    \"material_type\": \"fabric\",\n    \"uom_id\": 2,\n    \"fabric_width\": 140.00,\n    \"fabric_pattern\": \"Solid\",\n    \"color_code\": \"NAV-001\",\n    \"color_name\": \"Navy Blue\",\n    \"min_stock\": 100.0000,\n    \"max_stock\": 1000.0000,\n    \"lead_time_days\": 14\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Finishing Material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"finishing_material_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"material_name\": \"Cat PU Clear Gloss\",\n    \"category_id\": 6,\n    \"material_type\": \"finishing_paint\",\n    \"uom_id\": 9,\n    \"color_code\": \"CLEAR-GLOSS\",\n    \"color_name\": \"Clear Gloss\",\n    \"min_stock\": 50.0000,\n    \"max_stock\": 500.0000,\n    \"shelf_life_days\": 365,\n    \"storage_condition\": \"Simpan dalam suhu ruang, jauhkan dari api\",\n    \"safety_data\": \"Mudah terbakar, gunakan masker saat penggunaan\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Packaging Material",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"packaging_material_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"material_name\": \"Kardus Packaging Double Wall\",\n    \"category_id\": 14,\n    \"material_type\": \"packaging_box\",\n    \"uom_id\": 5,\n    \"min_stock\": 200.0000,\n    \"max_stock\": 5000.0000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Material by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials/{{wood_material_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials",
+                "{{wood_material_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Low Stock Materials",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials/low-stock",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials",
+                "low-stock"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Materials by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/materials/by-type",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "materials",
+                "by-type"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Suppliers",
+      "item": [
+        {
+          "name": "Get All Suppliers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/suppliers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "suppliers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create International Supplier (China)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"intl_supplier_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"supplier_code\": \"SUP-INT-001\",\n    \"supplier_name\": \"Guangdong Timber Co Ltd\",\n    \"supplier_type\": \"international\",\n    \"country\": \"China\",\n    \"city\": \"Guangzhou\",\n    \"address\": \"No. 88 Industrial Zone, Nansha District\",\n    \"phone\": \"+86-20-8888-9999\",\n    \"email\": \"sales@guangdongtimber.cn\",\n    \"contact_person\": \"Mr. Li Wei\",\n    \"tax_id\": \"CHN-123456789\",\n    \"bank_name\": \"Bank of China\",\n    \"bank_account\": \"1234567890123456\",\n    \"bank_swift\": \"BKCHCNBJ\",\n    \"currency_id\": 3,\n    \"payment_terms\": \"T/T 30% advance, 70% against BL\",\n    \"lead_time_days\": 45,\n    \"min_order_qty\": 10.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/suppliers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "suppliers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Local Supplier (Indonesia)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"local_supplier_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"supplier_code\": \"SUP-LOC-001\",\n    \"supplier_name\": \"PT Kayu Perkasa Indonesia\",\n    \"supplier_type\": \"local\",\n    \"country\": \"Indonesia\",\n    \"city\": \"Jepara\",\n    \"address\": \"Jl. Raya Jepara-Kudus KM 8\",\n    \"phone\": \"+62-291-555-777\",\n    \"email\": \"info@kayuperkasa.co.id\",\n    \"contact_person\": \"Bapak Sumarno\",\n    \"tax_id\": \"01.234.567.8-901.000\",\n    \"bank_name\": \"Bank Mandiri\",\n    \"bank_account\": \"1234567890\",\n    \"bank_swift\": \"BMRIIDJA\",\n    \"currency_id\": 1,\n    \"payment_terms\": \"Net 30 days\",\n    \"lead_time_days\": 14,\n    \"min_order_qty\": 1.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/suppliers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "suppliers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get International Suppliers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/suppliers/international",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "suppliers",
+                "international"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Local Suppliers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/suppliers/local",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "suppliers",
+                "local"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Purchase Orders",
+      "item": [
+        {
+          "name": "Get All Purchase Orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.length > 0) {",
+                  "    pm.environment.set(\"po_id\", jsonData.data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/purchase-orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "purchase-orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Purchase Order (International)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"po_id\", jsonData.id);",
+                  "    console.log('PO Number:', jsonData.po_number);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"supplier_id\": {{intl_supplier_id}},\n    \"po_date\": \"2026-05-06\",\n    \"expected_date\": \"2026-06-20\",\n    \"currency_id\": 3,\n    \"shipping_method\": \"Sea Freight\",\n    \"shipping_terms\": \"FOB\",\n    \"port_of_loading\": \"Guangzhou\",\n    \"port_of_discharge\": \"Tanjung Priok\",\n    \"incoterms\": \"FOB\",\n    \"payment_terms\": \"30% T/T advance, 70% against BL\",\n    \"notes\": \"Import kayu jati dari China\",\n    \"items\": [\n        {\n            \"material_id\": {{wood_material_id}},\n            \"quantity\": 25.5000,\n            \"uom_id\": 1,\n            \"unit_price\": 850.0000\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/purchase-orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "purchase-orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Purchase Order (Local)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    console.log('PO Number:', jsonData.po_number);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"supplier_id\": {{local_supplier_id}},\n    \"po_date\": \"2026-05-06\",\n    \"expected_date\": \"2026-05-20\",\n    \"currency_id\": 1,\n    \"shipping_method\": \"Land Transport\",\n    \"shipping_terms\": \"EXW\",\n    \"notes\": \"Pembelian kain lokal\",\n    \"items\": [\n        {\n            \"material_id\": {{fabric_material_id}},\n            \"quantity\": 500.0000,\n            \"uom_id\": 2,\n            \"unit_price\": 85000.0000\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/purchase-orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "purchase-orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get PO Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/purchase-orders/{{po_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "purchase-orders",
+                "{{po_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve PO",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/purchase-orders/{{po_id}}/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "purchase-orders",
+                "{{po_id}}",
+                "approve"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Goods Receipt (Penerimaan Barang)",
+      "item": [
+        {
+          "name": "Create Goods Receipt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"gr_id\", jsonData.id);",
+                  "    console.log('GR Number:', jsonData.gr_number);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"po_id\": {{po_id}},\n    \"receipt_date\": \"2026-06-20\",\n    \"supplier_id\": {{intl_supplier_id}},\n    \"warehouse_id\": 1,\n    \"notes\": \"Kontainer tiba sesuai jadwal\",\n    \"items\": [\n        {\n            \"po_item_id\": 1,\n            \"material_id\": {{wood_material_id}},\n            \"quantity_received\": 25.5000,\n            \"quantity_accepted\": 25.0000,\n            \"quantity_rejected\": 0.5000,\n            \"rack_id\": null,\n            \"batch_number\": \"BATCH-JT-2026-001\",\n            \"production_date\": \"2026-03-15\",\n            \"quality_grade\": \"A\",\n            \"moisture_content\": 11.50,\n            \"notes\": \"0.5 m³ retak kecil di bagian ujung\"\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/goods-receipts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "goods-receipts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Goods Receipts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/goods-receipts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "goods-receipts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get GR Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/goods-receipts/{{gr_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "goods-receipts",
+                "{{gr_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Stock Management",
+      "item": [
+        {
+          "name": "Get All Stock",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/stock",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "stock"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stock by Warehouse",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/stock/warehouse/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "stock",
+                "warehouse",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stock by Material",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/stock/material/{{wood_material_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "stock",
+                "material",
+                "{{wood_material_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stock Value",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/stock/value",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "stock",
+                "value"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stock Movements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/movements",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "movements"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Stock Opname",
+      "item": [
+        {
+          "name": "Get All Stock Opname",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/opname",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "opname"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Stock Opname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"opname_id\", jsonData.id);",
+                  "    console.log('Opname Number:', jsonData.opname_number);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"opname_date\": \"2026-05-06\",\n    \"warehouse_id\": 1,\n    \"opname_type\": \"full\",\n    \"notes\": \"Stock opname bulanan seluruh gudang utama\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/opname",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "opname"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Start Stock Opname",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/opname/{{opname_id}}/start",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "opname",
+                "{{opname_id}}",
+                "start"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Opname Item (Scan Result)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"material_id\": {{wood_material_id}},\n    \"actual_qty\": 24.8000,\n    \"unit_cost\": 850.0000,\n    \"notes\": \"Ditemukan selisih 0.2 m³\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/opname/{{opname_id}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "opname",
+                "{{opname_id}}",
+                "items"
+              ]
+            },
+            "description": "System akan otomatis menghitung variance antara system_qty dan actual_qty"
+          }
+        },
+        {
+          "name": "Complete Stock Opname",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/opname/{{opname_id}}/complete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "opname",
+                "{{opname_id}}",
+                "complete"
+              ]
+            },
+            "description": "Complete opname akan otomatis membuat stock adjustment untuk selisih"
+          }
+        },
+        {
+          "name": "Get Opname Detail with Items",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/opname/{{opname_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "opname",
+                "{{opname_id}}"
+              ]
+            },
+            "description": "Menampilkan detail opname beserta variance per item"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Damage Reports & Disposal",
+      "item": [
+        {
+          "name": "Get All Damage Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/damage-reports",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "damage-reports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Damage Report",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"damage_report_id\", jsonData.id);",
+                  "    console.log('Report Number:', jsonData.report_number);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"report_date\": \"2026-05-06\",\n    \"report_type\": \"damage\",\n    \"warehouse_id\": 1,\n    \"currency_id\": 1,\n    \"cause\": \"Kelembaban tinggi menyebabkan jamur pada kayu\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/damage-reports",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "damage-reports"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Damage Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"material_id\": {{wood_material_id}},\n    \"batch_number\": \"BATCH-JT-2026-001\",\n    \"quantity\": 0.5000,\n    \"volume_m3\": 0.5000,\n    \"unit_cost\": 850.0000,\n    \"condition_description\": \"Kayu berjamur di bagian permukaan, tidak bisa digunakan untuk produksi\",\n    \"root_cause\": \"Kelembaban gudang di atas 80% selama 1 minggu\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/damage-reports/{{damage_report_id}}/items",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "damage-reports",
+                "{{damage_report_id}}",
+                "items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Damage Photo",
           "request": {
             "method": "POST",
             "header": [
@@ -832,46 +2067,71 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "avatar",
+                  "key": "document",
                   "type": "file",
-                  "description": "Pilih foto avatar (JPEG, PNG, GIF, WebP - max 2 MB)",
-                  "value": null
+                  "src": [],
+                  "description": "Upload foto kerusakan material"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/users/{{current_user_id}}/avatar",
+              "raw": "{{base_url}}/api/inv/damage-reports/{{damage_report_id}}/documents",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
-                "users",
-                "{{current_user_id}}",
-                "avatar"
+                "inv",
+                "damage-reports",
+                "{{damage_report_id}}",
+                "documents"
               ]
-            },
-            "description": "Upload/Update foto profil user. Hanya gambar (JPEG, PNG, GIF, WebP) dengan maksimal 2 MB."
-          },
-          "response": []
+            }
+          }
         },
         {
-          "name": "Remove User Avatar",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Approve & Dispose Material",
           "request": {
-            "method": "DELETE",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"disposal_method\": \"burned\",\n    \"disposal_date\": \"2026-05-07\",\n    \"disposal_witness\": \"Bapak Ahmad (Kepala Gudang)\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/damage-reports/{{damage_report_id}}/dispose",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "damage-reports",
+                "{{damage_report_id}}",
+                "dispose"
+              ]
+            },
+            "description": "Approve laporan dan proses pemusnahan material. Stock akan otomatis berkurang."
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Documents (Customs & Shipping)",
+      "item": [
+        {
+          "name": "Get All Document Types",
+          "request": {
+            "method": "GET",
             "header": [
               {
                 "key": "Authorization",
@@ -879,28 +2139,171 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/users/{{current_user_id}}/avatar",
+              "raw": "{{base_url}}/api/inv/document-types",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
-                "users",
-                "{{current_user_id}}",
-                "avatar"
+                "inv",
+                "document-types"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Customs Number (PIB)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/documents/generate-number?doc_type_id=8",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "documents",
+                "generate-number"
+              ],
+              "query": [
+                {
+                  "key": "doc_type_id",
+                  "value": "8"
+                }
               ]
             },
-            "description": "Hapus foto profil user."
-          },
-          "response": []
+            "description": "Generate nomor PIB (Pemberitahuan Impor Barang) otomatis"
+          }
+        },
+        {
+          "name": "Create Document Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"doc_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"document_number\": \"PIB/2026/05/00001\",\n    \"doc_type_id\": 8,\n    \"reference_type\": \"po\",\n    \"reference_id\": {{po_id}},\n    \"document_date\": \"2026-06-20\",\n    \"issuing_authority\": \"Bea Cukai Tanjung Priok\",\n    \"notes\": \"Dokumen PIB untuk import kayu jati\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "documents"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Document File to CDN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload file dokumen (PDF, JPG, PNG, max 10 MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inv/documents/{{doc_id}}/upload",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "documents",
+                "{{doc_id}}",
+                "upload"
+              ]
+            },
+            "description": "Upload file dokumen ke CDN (maks 10 MB). File akan tersimpan di cdn/documents/"
+          }
+        },
+        {
+          "name": "Get All Documents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/inv/documents?reference_type=po&reference_id={{po_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inv",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "reference_type",
+                  "value": "po"
+                },
+                {
+                  "key": "reference_id",
+                  "value": "{{po_id}}"
+                }
+              ]
+            }
+          }
         }
       ]
     },
     {
-      "name": "7. CDN File Management",
+      "name": "13. CDN Files & Folders",
       "item": [
         {
-          "name": "Upload Single File",
+          "name": "Upload Single File to CDN",
           "event": [
             {
               "listen": "test",
@@ -957,51 +2360,6 @@
                 "api",
                 "cdn",
                 "upload"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Upload Multiple Files",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "files[]",
-                  "type": "file",
-                  "description": "Pilih multiple files",
-                  "value": null
-                },
-                {
-                  "key": "folder",
-                  "value": "/uploads",
-                  "type": "text"
-                },
-                {
-                  "key": "is_public",
-                  "value": "1",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{base_url}}/api/cdn/upload-multiple",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "cdn",
-                "upload-multiple"
               ]
             }
           },
@@ -1085,26 +2443,6 @@
           "response": []
         },
         {
-          "name": "Download File",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/cdn/download/{{cdn_file_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "cdn",
-                "download",
-                "{{cdn_file_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "View/Preview File",
           "request": {
             "method": "GET",
@@ -1125,82 +2463,20 @@
           "response": []
         },
         {
-          "name": "Update File Metadata",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"original_name\": \"renamed-file.jpg\",\n    \"folder\": \"/images\",\n    \"is_public\": 1\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/cdn/files/{{cdn_file_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "cdn",
-                "files",
-                "{{cdn_file_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete File",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/cdn/files/{{cdn_file_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "cdn",
-                "files",
-                "{{cdn_file_id}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get CDN Statistics",
+          "name": "Download File",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/api/cdn/stats",
+              "raw": "{{base_url}}/api/cdn/download/{{cdn_file_id}}",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "cdn",
-                "stats"
+                "download",
+                "{{cdn_file_id}}"
               ]
             }
           },
@@ -1269,6 +2545,30 @@
                   "key": "path",
                   "value": "/"
                 }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get CDN Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "stats"
               ]
             }
           },
