@@ -17,7 +17,9 @@ $routes->group('api', function($routes) {
     
     // Protected routes (with JWT middleware)
     $routes->group('', ['filter' => 'auth'], function($routes) {
-          // CDN Management
+         // Auth profile
+        $routes->get('auth/profile', 'Api\AuthController::profile');
+        // CDN Management
         $routes->post('cdn/upload', 'Api\CdnController::upload');
         $routes->post('cdn/upload-multiple', 'Api\CdnController::uploadMultiple');
         $routes->get('cdn/files', 'Api\CdnController::listFiles');
@@ -68,5 +70,11 @@ $routes->group('api', function($routes) {
         $routes->delete('users/(:num)', 'Api\UserManagementController::delete/$1');
         $routes->post('users/assign-role', 'Api\UserManagementController::assignRole');
         $routes->post('users/remove-role', 'Api\UserManagementController::removeRole');
-    });
+          // ✅ User Avatar Routes
+        $routes->post('users/(:num)/avatar', 'Api\UserManagementController::uploadAvatar/$1');
+        $routes->delete('users/(:num)/avatar', 'Api\UserManagementController::removeAvatar/$1');
+        
+        $routes->post('users/assign-role', 'Api\UserManagementController::assignRole');
+        $routes->post('users/remove-role', 'Api\UserManagementController::removeRole');
+        });
 });
