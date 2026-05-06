@@ -11,10 +11,29 @@ $routes->group('api', function($routes) {
     // Authentication routes (no auth required)
     $routes->post('auth/register', 'Api\AuthController::register');
     $routes->post('auth/login', 'Api\AuthController::login');
+     // CDN Public routes (no auth required for downloads if public)
+    $routes->get('cdn/download/(:num)', 'Api\CdnController::download/$1');
+    $routes->get('cdn/view/(:num)', 'Api\CdnController::view/$1');
     
     // Protected routes (with JWT middleware)
     $routes->group('', ['filter' => 'auth'], function($routes) {
+          // CDN Management
+        $routes->post('cdn/upload', 'Api\CdnController::upload');
+        $routes->post('cdn/upload-multiple', 'Api\CdnController::uploadMultiple');
+        $routes->get('cdn/files', 'Api\CdnController::listFiles');
+        $routes->get('cdn/files/(:num)', 'Api\CdnController::getFileInfo/$1');
+        $routes->put('cdn/files/(:num)', 'Api\CdnController::updateFile/$1');
+        $routes->delete('cdn/files/(:num)', 'Api\CdnController::deleteFile/$1');
+        $routes->get('cdn/stats', 'Api\CdnController::stats');
+        $routes->post('cdn/folders', 'Api\CdnController::createFolder');
+        $routes->get('cdn/folders', 'Api\CdnController::listFolders');
         
+        // Applications CRUD
+        $routes->get('applications', 'Api\ApplicationController::index');
+        $routes->post('applications', 'Api\ApplicationController::create');
+        $routes->get('applications/(:num)', 'Api\ApplicationController::show/$1');
+        $routes->put('applications/(:num)', 'Api\ApplicationController::update/$1');
+        $routes->delete('applications/(:num)', 'Api\ApplicationController::delete/$1');
         // Applications CRUD
         $routes->get('applications', 'Api\ApplicationController::index');
         $routes->post('applications', 'Api\ApplicationController::create');
