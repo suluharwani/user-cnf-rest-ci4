@@ -1,0 +1,1280 @@
+{
+  "info": {
+    "_postman_id": "41bfbc59-2122-4af4-8904-7cca9620bd89",
+    "name": "User Management API - RBAC + CDN + Avatar",
+    "description": "REST API untuk User Management dengan Role-Based Access Control, CDN File Management, dan User Avatar",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "8868561"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register - First Admin User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.user_id) {",
+                  "    pm.environment.set(\"first_user_id\", jsonData.user_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{admin_username}}\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"{{admin_password}}\",\n    \"fullname\": \"System Administrator\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "    pm.environment.set(\"current_user_id\", jsonData.user.id);",
+                  "    console.log('Token saved successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{admin_username}}\",\n    \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.user && jsonData.user.avatar) {",
+                  "    console.log('Avatar:', JSON.stringify(jsonData.user.avatar));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            },
+            "description": "Dapatkan profil user yang sedang login (termasuk avatar)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Applications CRUD",
+      "item": [
+        {
+          "name": "Get All Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "applications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Application - Inventory",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"app_inventory_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"app_name\": \"Inventory Management System\",\n    \"app_code\": \"inventory\",\n    \"description\": \"Sistem manajemen inventaris dan stok barang\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "applications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Application - HR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"app_hr_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"app_name\": \"Human Resource System\",\n    \"app_code\": \"hr_system\",\n    \"description\": \"Sistem manajemen karyawan dan HR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "applications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/applications/{{app_inventory_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{app_inventory_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Application",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"app_name\": \"Inventory System Updated\",\n    \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/applications/{{app_inventory_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{app_inventory_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Application",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/applications/{{app_inventory_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{app_inventory_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Modules CRUD",
+      "item": [
+        {
+          "name": "Create Module - Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"module_products_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"module_name\": \"Product Management\",\n    \"module_code\": \"products\",\n    \"application_id\": {{app_inventory_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "modules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Module - Stock",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"module_stock_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"module_name\": \"Stock Management\",\n    \"module_code\": \"stock\",\n    \"application_id\": {{app_inventory_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "modules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Modules by Application",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/applications/{{app_inventory_id}}/modules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "applications",
+                "{{app_inventory_id}}",
+                "modules"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Roles CRUD",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Role - Inventory Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"role_inventory_manager_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role_name\": \"Inventory Manager\",\n    \"role_code\": \"inventory_manager\",\n    \"description\": \"Dapat mengelola inventory dan stok barang\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Role - Inventory Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.environment.set(\"role_inventory_staff_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role_name\": \"Inventory Staff\",\n    \"role_code\": \"inventory_staff\",\n    \"description\": \"Hanya dapat melihat data inventory\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/roles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Role Permissions",
+      "item": [
+        {
+          "name": "Set Permissions - Inventory Manager (Full)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role_id\": {{role_inventory_manager_id}},\n    \"permissions\": [\n        {\n            \"application_id\": {{app_inventory_id}},\n            \"module_id\": {{module_products_id}},\n            \"can_create\": 1,\n            \"can_read\": 1,\n            \"can_update\": 1,\n            \"can_delete\": 1\n        },\n        {\n            \"application_id\": {{app_inventory_id}},\n            \"module_id\": {{module_stock_id}},\n            \"can_create\": 1,\n            \"can_read\": 1,\n            \"can_update\": 1,\n            \"can_delete\": 1\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/role-permissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "role-permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Permissions - Inventory Staff (Read Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role_id\": {{role_inventory_staff_id}},\n    \"permissions\": [\n        {\n            \"application_id\": {{app_inventory_id}},\n            \"module_id\": {{module_products_id}},\n            \"can_create\": 0,\n            \"can_read\": 1,\n            \"can_update\": 0,\n            \"can_delete\": 0\n        },\n        {\n            \"application_id\": {{app_inventory_id}},\n            \"module_id\": {{module_stock_id}},\n            \"can_create\": 0,\n            \"can_read\": 1,\n            \"can_update\": 0,\n            \"can_delete\": 0\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/role-permissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "role-permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Permissions by Role",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/roles/{{role_inventory_manager_id}}/permissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "roles",
+                "{{role_inventory_manager_id}}",
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. User Management",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID (with Avatar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{current_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{current_user_id}}"
+              ]
+            },
+            "description": "Dapatkan detail user by ID termasuk info avatar."
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Role to User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": {{current_user_id}},\n    \"role_id\": {{role_inventory_manager_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/assign-role",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "assign-role"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check User Access",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/check-access/{{current_user_id}}/products/create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "check-access",
+                "{{current_user_id}}",
+                "products",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload User Avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.avatar) {",
+                  "    pm.environment.set(\"user_avatar_url\", jsonData.avatar.url);",
+                  "    console.log('Avatar URL:', jsonData.avatar.url);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "description": "Pilih foto avatar (JPEG, PNG, GIF, WebP - max 2 MB)",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{current_user_id}}/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{current_user_id}}",
+                "avatar"
+              ]
+            },
+            "description": "Upload/Update foto profil user. Hanya gambar (JPEG, PNG, GIF, WebP) dengan maksimal 2 MB."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove User Avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{current_user_id}}/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{current_user_id}}",
+                "avatar"
+              ]
+            },
+            "description": "Hapus foto profil user."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. CDN File Management",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.file && jsonData.file.id) {",
+                  "    pm.environment.set(\"cdn_file_id\", jsonData.file.id);",
+                  "    console.log('File ID:', jsonData.file.id);",
+                  "    console.log('URL:', jsonData.file.url);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Pilih file (max 10 MB, semua ekstensi)",
+                  "value": null
+                },
+                {
+                  "key": "folder",
+                  "value": "/images",
+                  "type": "text",
+                  "description": "Folder tujuan (default: /)"
+                },
+                {
+                  "key": "is_public",
+                  "value": "1",
+                  "type": "text",
+                  "description": "1 = Public, 0 = Private"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cdn/upload",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files[]",
+                  "type": "file",
+                  "description": "Pilih multiple files",
+                  "value": null
+                },
+                {
+                  "key": "folder",
+                  "value": "/uploads",
+                  "type": "text"
+                },
+                {
+                  "key": "is_public",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cdn/upload-multiple",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "upload-multiple"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Files",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.files && jsonData.files.length > 0) {",
+                  "    pm.environment.set(\"cdn_file_id\", jsonData.files[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/files?folder=/&page=1&limit=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "files"
+              ],
+              "query": [
+                {
+                  "key": "folder",
+                  "value": "/"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get File Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/files/{{cdn_file_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "files",
+                "{{cdn_file_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/download/{{cdn_file_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "download",
+                "{{cdn_file_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View/Preview File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/view/{{cdn_file_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "view",
+                "{{cdn_file_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update File Metadata",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"original_name\": \"renamed-file.jpg\",\n    \"folder\": \"/images\",\n    \"is_public\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cdn/files/{{cdn_file_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "files",
+                "{{cdn_file_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/files/{{cdn_file_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "files",
+                "{{cdn_file_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get CDN Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Folder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "path",
+                  "value": "/new-folder",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cdn/folders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "folders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Folders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cdn/folders?path=/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "cdn",
+                "folders"
+              ],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "/"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
