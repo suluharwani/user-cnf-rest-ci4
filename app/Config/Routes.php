@@ -155,3 +155,77 @@ $routes->group('api/inv', ['filter' => 'auth'], function($routes) {
     $routes->get('warehouses', 'Api\Inv\InvWarehouseController::index');
     $routes->post('warehouses', 'Api\Inv\InvWarehouseController::create');
 });
+$routes->group('api/acc', ['filter' => 'auth'], function($routes) {
+    
+    // Chart of Accounts
+    $routes->get('coa', 'Api\Acc\AccCoaController::index');
+    $routes->get('coa/tree', 'Api\Acc\AccCoaController::tree');
+    $routes->post('coa', 'Api\Acc\AccCoaController::create');
+    $routes->get('coa/(:num)', 'Api\Acc\AccCoaController::show/$1');
+    
+    // Journal Entries
+    $routes->get('journals', 'Api\Acc\AccJournalController::index');
+    $routes->post('journals', 'Api\Acc\AccJournalController::create');
+    $routes->get('journals/(:num)', 'Api\Acc\AccJournalController::show/$1');
+    $routes->put('journals/(:num)/post', 'Api\Acc\AccJournalController::post/$1');
+    $routes->post('journals/(:num)/reverse', 'Api\Acc\AccJournalController::reverse/$1');
+    // ✅ TAMBAHKAN INI - Trial Balance via Journal controller
+    $routes->get('journals/trial-balance', 'Api\Acc\AccJournalController::trialBalance');
+    
+    // Cash & Bank
+    $routes->get('cash-banks', 'Api\Acc\AccCashBankController::index');
+    $routes->post('cash-banks', 'Api\Acc\AccCashBankController::create');
+    $routes->post('cash-banks/receive', 'Api\Acc\AccCashBankController::receivePayment');
+    $routes->post('cash-banks/pay', 'Api\Acc\AccCashBankController::makePayment');
+    
+    // Accounts Receivable
+    $routes->get('receivables', 'Api\Acc\AccReceivableController::index');
+    $routes->post('receivables', 'Api\Acc\AccReceivableController::create');
+    $routes->get('receivables/(:num)', 'Api\Acc\AccReceivableController::show/$1');
+    $routes->post('receivables/(:num)/payment', 'Api\Acc\AccReceivableController::addPayment/$1');
+    
+    // Accounts Payable
+    $routes->get('payables', 'Api\Acc\AccPayableController::index');
+    $routes->post('payables', 'Api\Acc\AccPayableController::create');
+    $routes->get('payables/(:num)', 'Api\Acc\AccPayableController::show/$1');
+    $routes->post('payables/(:num)/payment', 'Api\Acc\AccPayableController::addPayment/$1');
+    
+    // Fixed Assets
+    $routes->get('fixed-assets', 'Api\Acc\AccFixedAssetController::index');
+    $routes->post('fixed-assets', 'Api\Acc\AccFixedAssetController::create');
+    $routes->get('fixed-assets/(:num)', 'Api\Acc\AccFixedAssetController::show/$1');
+    $routes->post('fixed-assets/(:num)/depreciate', 'Api\Acc\AccFixedAssetController::depreciation/$1');
+    $routes->post('fixed-assets/depreciate-all', 'Api\Acc\AccFixedAssetController::runAllDepreciation');
+    
+    // Payment Vouchers
+    $routes->get('payment-vouchers', 'Api\Acc\AccPaymentVoucherController::index');
+    $routes->post('payment-vouchers', 'Api\Acc\AccPaymentVoucherController::create');
+    $routes->get('payment-vouchers/(:num)', 'Api\Acc\AccPaymentVoucherController::show/$1');
+    $routes->put('payment-vouchers/(:num)/approve', 'Api\Acc\AccPaymentVoucherController::approve/$1');
+    
+    // Bank Reconciliation
+    $routes->get('reconciliations', 'Api\Acc\AccReconciliationController::index');
+    $routes->post('reconciliations', 'Api\Acc\AccReconciliationController::create');
+    $routes->get('reconciliations/(:num)', 'Api\Acc\AccReconciliationController::show/$1');
+    $routes->put('reconciliations/(:num)/complete', 'Api\Acc\AccReconciliationController::complete/$1');
+    
+    // ✅ Reports Routes
+    $routes->get('reports/trial-balance', 'Api\Acc\AccReportController::trialBalance');
+    $routes->get('reports/income-statement', 'Api\Acc\AccReportController::incomeStatement');
+    $routes->get('reports/balance-sheet', 'Api\Acc\AccReportController::balanceSheet');
+    $routes->get('reports/ar-aging', 'Api\Acc\AccReportController::arAging');
+    $routes->get('reports/ap-aging', 'Api\Acc\AccReportController::apAging');
+    $routes->get('reports/fixed-assets', 'Api\Acc\AccReportController::fixedAssetSchedule');
+    $routes->get('reports/cash-flow', 'Api\Acc\AccReportController::cashFlow');
+    
+    // Budget
+    $routes->get('budgets', 'Api\Acc\AccBudgetController::index');
+    $routes->post('budgets', 'Api\Acc\AccBudgetController::create');
+    $routes->get('budgets/(:num)', 'Api\Acc\AccBudgetController::show/$1');
+    $routes->get('budgets/(:num)/vs-actual', 'Api\Acc\AccBudgetController::vsActual/$1');
+    
+    // Tax
+    $routes->get('taxes', 'Api\Acc\AccTaxController::index');
+    $routes->post('taxes', 'Api\Acc\AccTaxController::create');
+    $routes->get('taxes/(:num)', 'Api\Acc\AccTaxController::show/$1');
+});
